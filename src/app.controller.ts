@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Logger } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
@@ -12,6 +12,7 @@ export class AppController {
     private readonly appService: AppService,
     private readonly health: HealthCheckService,
     private readonly http: HttpHealthIndicator,
+    private readonly logger: Logger,
   ) {}
 
   @Get()
@@ -22,6 +23,10 @@ export class AppController {
   @Get('health')
   @HealthCheck()
   check() {
+    this.logger.log('test', {
+      message: 'Health check performed',
+      meta: { timestamp: new Date().toISOString() },
+    });
     return this.health.check([
       () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
     ]);

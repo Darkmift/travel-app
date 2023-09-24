@@ -14,7 +14,9 @@ export class RegisterUserDTO extends LoginUserDTO {
 
 export class UserDTO {
   @ApiProperty()
-  email: string;
+  first_name: string;
+  @ApiProperty()
+  last_name: string;
   @ApiProperty()
   password?: string;
   @ApiProperty()

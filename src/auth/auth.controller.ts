@@ -1,10 +1,11 @@
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Logger, UseFilters } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserDTO, RegisterUserDTO } from 'src/common/types/user';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-
+import { LoginUserDTO, RegisterUserDTO, User } from 'src/entities/user.entity';
+import { ValidationError } from '@nestjs/class-validator';
+import { HttpExceptionFilter } from 'src/common/filters/http-exception';
 @ApiTags('Auth')
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -14,15 +15,16 @@ export class AuthController {
   @ApiBody({ type: LoginUserDTO })
   @Post('login')
   login(@Body() loginUser: LoginUserDTO): string {
-    // Use LoginUser type
     return this.authService.login(loginUser);
   }
 
   @ApiBody({ type: RegisterUserDTO })
   @Post('register')
-  register(@Body() user: RegisterUserDTO): string {
-    // Use User type
+  @UseFilters(new HttpExceptionFilter())
+  async register(@Body() user: User): Promise<void | ValidationError[]> {
     this.logger.log('Registering user', user);
-    return this.authService.register(user);
+    const errors = await this.authService.validateUser(user);
+    if (errors && errors.length) throw errors;
+    await this.authService.register(user);
   }
 }

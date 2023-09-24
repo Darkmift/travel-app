@@ -59,18 +59,8 @@ export class User extends AbstractEntity {
   @Exclude()
   role: UserRole;
 
-  @ManyToMany(() => Holiday)
-  @JoinTable({
-    name: 'follow',
-    joinColumn: {
-      name: 'userId',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'holidayId',
-      referencedColumnName: 'id',
-    },
-  })
+  @ManyToMany(() => Holiday, (holiday) => holiday.followers)
+  @JoinTable()
   holidays: Holiday[];
 }
 

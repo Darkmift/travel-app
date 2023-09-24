@@ -8,7 +8,7 @@ export class Holiday {
   @ApiPropertyOptional()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, unique: true })
   @ApiProperty()
   destination: string;
 
@@ -16,13 +16,13 @@ export class Holiday {
   @ApiProperty()
   description: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @ApiProperty()
-  start_date: Date;
+  start_date: string;
 
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   @ApiProperty()
-  end_date: Date;
+  end_date: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   @ApiProperty()
@@ -32,6 +32,6 @@ export class Holiday {
   @ApiProperty()
   image_name: string;
 
-  @ManyToMany(() => User)
-  users: User[];
+  @ManyToMany(() => User, (user) => user.holidays)
+  followers: User[];
 }

@@ -6,7 +6,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
+import { Holiday } from './holiday.entity';
 
 export enum UserRole {
   USER = 'user',
@@ -55,6 +58,20 @@ export class User extends AbstractEntity {
   })
   @Exclude()
   role: UserRole;
+
+  @ManyToMany(() => Holiday)
+  @JoinTable({
+    name: 'follow',
+    joinColumn: {
+      name: 'userId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'holidayId',
+      referencedColumnName: 'id',
+    },
+  })
+  holidays: Holiday[];
 }
 
 export class LoginUserDTO {

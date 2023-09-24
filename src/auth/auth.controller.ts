@@ -34,9 +34,10 @@ export class AuthController {
   @Post('register')
   @UseFilters(new HttpExceptionFilter())
   async register(@Body() user: User): Promise<void | ValidationError[]> {
-    this.logger.log('Registering user', user);
+    this.logger.log('Validating user', user);
     const errors = await this.authService.validateUser(user);
     if (errors && errors.length) throw errors;
+    this.logger.log('Registering user', user);
     await this.authService.register(user);
   }
 

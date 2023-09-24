@@ -1,9 +1,19 @@
-import { Controller, Post, Body, Logger, UseFilters } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Logger,
+  UseFilters,
+  UseGuards,
+  Get,
+  Request,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LoginUserDTO, RegisterUserDTO, User } from 'src/entities/user.entity';
 import { ValidationError } from '@nestjs/class-validator';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception';
+import { AuthGuard } from './auth.guard';
 @ApiTags('Auth')
 @Controller('api/auth')
 export class AuthController {
@@ -14,8 +24,10 @@ export class AuthController {
 
   @ApiBody({ type: LoginUserDTO })
   @Post('login')
-  login(@Body() loginUser: LoginUserDTO): string {
-    return this.authService.login(loginUser);
+  async login(
+    @Body() loginUser: LoginUserDTO,
+  ): Promise<User & { access_token: string }> {
+    return await this.authService.login(loginUser);
   }
 
   @ApiBody({ type: RegisterUserDTO })
@@ -26,5 +38,11 @@ export class AuthController {
     const errors = await this.authService.validateUser(user);
     if (errors && errors.length) throw errors;
     await this.authService.register(user);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
   }
 }

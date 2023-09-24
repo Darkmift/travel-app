@@ -7,7 +7,9 @@ import {
   Param,
   Body,
   UseGuards,
+  Query,
   Logger,
+  UseFilters,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,10 +21,12 @@ import {
 import { HolidayService } from './holiday.service';
 import { Holiday } from 'src/entities/holiday.entity';
 import { AuthGuard } from '../auth/auth.guard';
+import { HttpExceptionFilter } from 'src/common/filters/http-exception';
 
 @ApiTags('Holidays')
 @ApiBearerAuth()
-@Controller('api/holidays')
+@Controller('api/holiday')
+@UseFilters(new HttpExceptionFilter())
 export class HolidayController {
   constructor(
     private readonly holidayService: HolidayService,
@@ -33,45 +37,47 @@ export class HolidayController {
   @ApiResponse({
     status: 200,
     description: 'Returns all holidays.',
-    type: [Holiday],
   })
   @Get()
-  async getAllHolidays(): Promise<Holiday[]> {
+  async getAllHolidays(@Query('userId') userId?: number): Promise<any[]> {
     this.logger.log('Getting all holidays');
-    return await this.holidayService.getAllHolidays();
+    return await this.holidayService.getAllHolidays(userId);
   }
 
   @ApiOperation({ summary: 'Get holiday by ID' })
   @ApiResponse({
     status: 200,
     description: 'Returns the holiday by ID.',
-    type: Holiday,
   })
   @UseGuards(AuthGuard)
   @Get(':id')
-  async getHolidayById(@Param('id') id: number): Promise<Holiday> {
+  async getHolidayById(
+    @Param('id') id: number,
+    @Query('userId') userId?: number,
+  ): Promise<any> {
     this.logger.log(`Getting holiday by id: ${id}`);
-    return await this.holidayService.getHolidayById(id);
+    return await this.holidayService.getHolidayById(id, userId);
   }
 
   @ApiOperation({ summary: 'Create a new holiday' })
   @ApiResponse({
     status: 201,
     description: 'The holiday has been successfully created.',
-    type: Holiday,
   })
   @ApiBody({ type: Holiday })
   @UseGuards(AuthGuard)
   @Post()
-  async createHoliday(@Body() holiday: Holiday): Promise<Holiday> {
-    return await this.holidayService.createHoliday(holiday);
+  async createHoliday(
+    @Body() holiday: Holiday,
+    @Query('userId') userId?: number,
+  ): Promise<any> {
+    return await this.holidayService.createHoliday(holiday, userId);
   }
 
   @ApiOperation({ summary: 'Update an existing holiday' })
   @ApiResponse({
     status: 200,
     description: 'The holiday has been successfully updated.',
-    type: Holiday,
   })
   @ApiBody({ type: Holiday })
   @UseGuards(AuthGuard)
@@ -79,8 +85,9 @@ export class HolidayController {
   async updateHoliday(
     @Param('id') id: number,
     @Body() holiday: Holiday,
-  ): Promise<Holiday> {
-    return await this.holidayService.updateHoliday(id, holiday);
+    @Query('userId') userId?: number,
+  ): Promise<any> {
+    return await this.holidayService.updateHoliday(id, holiday, userId);
   }
 
   @ApiOperation({ summary: 'Delete a holiday' })

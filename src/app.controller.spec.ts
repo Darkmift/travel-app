@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthCheckService, HttpHealthIndicator } from '@nestjs/terminus';
+import { Logger } from '@nestjs/common';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -28,6 +29,7 @@ describe('AppController', () => {
           provide: HttpHealthIndicator,
           useValue: mockHttpHealthIndicator,
         },
+        Logger,
       ],
     }).compile();
 

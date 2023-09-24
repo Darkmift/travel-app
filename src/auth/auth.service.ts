@@ -2,7 +2,7 @@ import { ValidationError, validate } from '@nestjs/class-validator';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginUser } from 'src/common/types/user';
-import { User } from 'src/entities/user.entity';
+import { User, UserRole } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -20,21 +20,17 @@ export class AuthService {
     email,
     password,
   }: LoginUser): Promise<User & { access_token: string }> {
-    // Fetch the user by email
     const user = await this.usersRepository.findOne({ where: { email } });
 
     if (!user) {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    // Compare the hashed password
     const isPasswordMatching = await bcrypt.compare(password, user.password);
-
     if (!isPasswordMatching) {
       throw new UnauthorizedException('Invalid email or password.');
     }
 
-    // Implement your JWT logic here, for now, just return a string
     const payload = { id: user.id, role: user.role };
     return {
       ...user,
@@ -56,11 +52,9 @@ export class AuthService {
   }
 
   async register(user: User): Promise<void | ValidationError[]> {
-    this.logger.log('Registering user', user);
-
-    // Hash the password
     const salt = await bcrypt.genSalt();
     user.password = await bcrypt.hash(user.password, salt);
+    user.role = UserRole.USER;
 
     await this.usersRepository.save(user);
   }

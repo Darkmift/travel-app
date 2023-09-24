@@ -9,7 +9,13 @@ import {
   UseGuards,
   Logger,
 } from '@nestjs/common';
-import { ApiTags, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBody,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { HolidayService } from './holiday.service';
 import { Holiday } from 'src/entities/holiday.entity';
 import { AuthGuard } from '../auth/auth.guard';
@@ -23,12 +29,24 @@ export class HolidayController {
     private readonly logger: Logger,
   ) {}
 
+  @ApiOperation({ summary: 'Get all holidays' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all holidays.',
+    type: [Holiday],
+  })
   @Get()
   async getAllHolidays(): Promise<Holiday[]> {
     this.logger.log('Getting all holidays');
     return await this.holidayService.getAllHolidays();
   }
 
+  @ApiOperation({ summary: 'Get holiday by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the holiday by ID.',
+    type: Holiday,
+  })
   @UseGuards(AuthGuard)
   @Get(':id')
   async getHolidayById(@Param('id') id: number): Promise<Holiday> {
@@ -36,6 +54,12 @@ export class HolidayController {
     return await this.holidayService.getHolidayById(id);
   }
 
+  @ApiOperation({ summary: 'Create a new holiday' })
+  @ApiResponse({
+    status: 201,
+    description: 'The holiday has been successfully created.',
+    type: Holiday,
+  })
   @ApiBody({ type: Holiday })
   @UseGuards(AuthGuard)
   @Post()
@@ -43,6 +67,12 @@ export class HolidayController {
     return await this.holidayService.createHoliday(holiday);
   }
 
+  @ApiOperation({ summary: 'Update an existing holiday' })
+  @ApiResponse({
+    status: 200,
+    description: 'The holiday has been successfully updated.',
+    type: Holiday,
+  })
   @ApiBody({ type: Holiday })
   @UseGuards(AuthGuard)
   @Put(':id')
@@ -53,6 +83,11 @@ export class HolidayController {
     return await this.holidayService.updateHoliday(id, holiday);
   }
 
+  @ApiOperation({ summary: 'Delete a holiday' })
+  @ApiResponse({
+    status: 200,
+    description: 'The holiday has been successfully deleted.',
+  })
   @UseGuards(AuthGuard)
   @Delete(':id')
   async deleteHoliday(@Param('id') id: number): Promise<void> {

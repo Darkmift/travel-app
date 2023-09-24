@@ -5,6 +5,7 @@ import {
   HttpHealthIndicator,
 } from '@nestjs/terminus';
 import { AppService } from './app.service';
+import { ApiTags } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
@@ -16,10 +17,12 @@ export class AppController {
   ) {}
 
   @Get()
+  @ApiTags('General')
   getHello(): string {
     return this.appService.getHello();
   }
 
+  @ApiTags('Health')
   @Get('health')
   @HealthCheck()
   check() {

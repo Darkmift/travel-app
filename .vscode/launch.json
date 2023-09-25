@@ -5,6 +5,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "command": "yarn dev",  
+      "name": "Run Client",
+      "request": "launch",
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}/client" 
+    },
+    {
       "command": "yarn start:debug",
       "name": "Run Server",
       "request": "launch",

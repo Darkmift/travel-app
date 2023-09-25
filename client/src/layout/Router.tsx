@@ -1,4 +1,4 @@
-import { RouterProvider, Router, Route, RootRoute } from '@tanstack/react-router';
+import { RouterProvider, Router, Route, RootRoute, redirect } from '@tanstack/react-router';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
@@ -15,6 +15,19 @@ const homeRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/',
   component: Home,
+  beforeLoad: async () => {
+    if (!useAuthStore.getState()?.user?.id) {
+      throw redirect({
+        to: '/login',
+        search: {
+          // Use the current location to power a redirect after login
+          // (Do not use `router.state.resolvedLocation` as it can
+          // potentially lag behind the actual current location)
+          redirect: router.state.location.href,
+        },
+      });
+    }
+  },
 });
 
 const loginRoute = new Route({

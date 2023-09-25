@@ -35,3 +35,11 @@ export class Holiday {
   @ManyToMany(() => User, (user) => user.holidays)
   followers: User[];
 }
+
+export class HolidayWithFollowData extends Holiday {
+  @ApiProperty()
+  followerCount: number;
+
+  @ApiProperty()
+  isFollowing: boolean;
+}

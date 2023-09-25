@@ -19,7 +19,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { HolidayService } from './holiday.service';
-import { Holiday } from 'src/entities/holiday.entity';
+import { Holiday, HolidayWithFollowData } from 'src/entities/holiday.entity';
 import { AuthGuard } from '../auth/auth.guard';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception';
 
@@ -39,7 +39,9 @@ export class HolidayController {
     description: 'Returns all holidays.',
   })
   @Get()
-  async getAllHolidays(@Query('userId') userId?: number): Promise<any[]> {
+  async getAllHolidays(
+    @Query('userId') userId?: number,
+  ): Promise<HolidayWithFollowData[]> {
     this.logger.log('Getting all holidays');
     return await this.holidayService.getAllHolidays(userId);
   }
@@ -54,7 +56,7 @@ export class HolidayController {
   async getHolidayById(
     @Param('id') id: number,
     @Query('userId') userId?: number,
-  ): Promise<any> {
+  ): Promise<HolidayWithFollowData> {
     this.logger.log(`Getting holiday by id: ${id}`);
     return await this.holidayService.getHolidayById(id, userId);
   }
@@ -70,7 +72,7 @@ export class HolidayController {
   async createHoliday(
     @Body() holiday: Holiday,
     @Query('userId') userId?: number,
-  ): Promise<any> {
+  ): Promise<HolidayWithFollowData> {
     return await this.holidayService.createHoliday(holiday, userId);
   }
 
@@ -86,7 +88,7 @@ export class HolidayController {
     @Param('id') id: number,
     @Body() holiday: Holiday,
     @Query('userId') userId?: number,
-  ): Promise<any> {
+  ): Promise<HolidayWithFollowData> {
     return await this.holidayService.updateHoliday(id, holiday, userId);
   }
 

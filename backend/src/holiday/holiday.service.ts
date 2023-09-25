@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Holiday } from 'src/entities/holiday.entity';
+import { Holiday, HolidayWithFollowData } from 'src/entities/holiday.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
@@ -11,7 +11,9 @@ export class HolidayService {
     private readonly logger: Logger,
   ) {}
 
-  private getHolidayWithExtras(userId?: number): SelectQueryBuilder<Holiday> {
+  private getHolidayWithFollowData(
+    userId?: number,
+  ): SelectQueryBuilder<Holiday> {
     return this.holidayRepository
       .createQueryBuilder('holiday')
       .select('holiday.*') // Select all columns from holiday
@@ -26,18 +28,35 @@ export class HolidayService {
       .groupBy('holiday.id');
   }
 
-  async getAllHolidays(userId?: number): Promise<any[]> {
+  private castHolidayWithFollowData(
+    holiday: HolidayWithFollowData,
+  ): HolidayWithFollowData {
+    holiday.followerCount = parseInt(holiday.followerCount.toString());
+    holiday.isFollowing = !!parseInt(holiday.followerCount.toString());
+    return holiday;
+  }
+
+  async getAllHolidays(userId?: number): Promise<HolidayWithFollowData[]> {
     this.logger.log('Fetching all holidays');
-    return await this.getHolidayWithExtras(userId).getRawMany();
+    return (await this.getHolidayWithFollowData(userId).getRawMany()).map(
+      this.castHolidayWithFollowData,
+    ) as HolidayWithFollowData[];
   }
 
-  async getHolidayById(id: number, userId?: number): Promise<any> {
-    return await this.getHolidayWithExtras(userId)
+  async getHolidayById(
+    id: number,
+    userId?: number,
+  ): Promise<HolidayWithFollowData> {
+    return await this.getHolidayWithFollowData(userId)
       .andWhere('holiday.id = :id', { id })
-      .getRawOne();
+      .getRawOne()
+      .then(this.castHolidayWithFollowData);
   }
 
-  async createHoliday(holiday: Holiday, userId?: number): Promise<any> {
+  async createHoliday(
+    holiday: Holiday,
+    userId?: number,
+  ): Promise<HolidayWithFollowData> {
     const newHoliday = await this.holidayRepository.save(holiday);
     return this.getHolidayById(newHoliday.id, userId);
   }
@@ -46,7 +65,7 @@ export class HolidayService {
     id: number,
     holiday: Holiday,
     userId?: number,
-  ): Promise<any> {
+  ): Promise<HolidayWithFollowData> {
     await this.holidayRepository.update(id, holiday);
     return this.getHolidayById(id, userId);
   }

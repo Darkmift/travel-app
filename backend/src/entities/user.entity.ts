@@ -85,3 +85,5 @@ export class RegisterUserDTO {
   @ApiProperty()
   first_name: string;
 }
+
+export type ResponseUser = Omit<User, 'password'> & { access_token: string };

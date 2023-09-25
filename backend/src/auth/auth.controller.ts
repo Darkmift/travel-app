@@ -10,7 +10,12 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { LoginUserDTO, RegisterUserDTO, User } from 'src/entities/user.entity';
+import {
+  LoginUserDTO,
+  RegisterUserDTO,
+  ResponseUser,
+  User,
+} from 'src/entities/user.entity';
 import { ValidationError } from '@nestjs/class-validator';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception';
 import { AuthGuard } from './auth.guard';
@@ -24,9 +29,7 @@ export class AuthController {
 
   @ApiBody({ type: LoginUserDTO })
   @Post('login')
-  async login(
-    @Body() loginUser: LoginUserDTO,
-  ): Promise<User & { access_token: string }> {
+  async login(@Body() loginUser: LoginUserDTO): Promise<ResponseUser> {
     return await this.authService.login(loginUser);
   }
 

@@ -2,7 +2,7 @@ import { ValidationError, validate } from '@nestjs/class-validator';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoginUser } from 'src/common/types/user';
-import { User, UserRole } from 'src/entities/user.entity';
+import { ResponseUser, User, UserRole } from 'src/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
@@ -16,10 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login({
-    email,
-    password,
-  }: LoginUser): Promise<User & { access_token: string }> {
+  async login({ email, password }: LoginUser): Promise<ResponseUser> {
     const user = await this.usersRepository.findOne({ where: { email } });
 
     if (!user) {
@@ -32,6 +29,7 @@ export class AuthService {
     }
 
     const payload = { id: user.id, role: user.role };
+    delete user.password;
     return {
       ...user,
       access_token: await this.jwtService.signAsync(payload),

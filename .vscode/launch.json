@@ -9,15 +9,15 @@
       "name": "Run Server",
       "request": "launch",
       "type": "node-terminal",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "cwd": "${workspaceFolder}/backend",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "command": "yarn test",
       "name": "Run test",
       "request": "launch",
-      "type": "node-terminal"
-    },
+      "type": "node-terminal",
+      "cwd": "${workspaceFolder}/backend"
+    }
   ]
 }

@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { validate } from '@nestjs/class-validator';
+import { Injectable, Logger, ValidationError } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Holiday, HolidayWithFollowData } from 'src/entities/holiday.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -51,6 +52,19 @@ export class HolidayService {
       .andWhere('holiday.id = :id', { id })
       .getRawOne()
       .then(this.castHolidayWithFollowData);
+  }
+
+  async validateHoliday(holiday: Holiday): Promise<void | ValidationError[]> {
+    const preValidatedHoliday = new Holiday();
+    Object.assign(preValidatedHoliday, holiday);
+    const errors = await validate(preValidatedHoliday);
+    if (!errors.length) return;
+    this.logger.error({
+      message: 'Validation failed for holiday:',
+      errors,
+      holiday,
+    });
+    return errors;
   }
 
   async createHoliday(

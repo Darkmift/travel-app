@@ -73,6 +73,8 @@ export class HolidayController {
     @Body() holiday: Holiday,
     @Query('userId') userId?: number,
   ): Promise<HolidayWithFollowData> {
+    const errors = await this.holidayService.validateHoliday(holiday);
+    if (errors && errors.length) throw errors;
     return await this.holidayService.createHoliday(holiday, userId);
   }
 
@@ -89,6 +91,8 @@ export class HolidayController {
     @Body() holiday: Holiday,
     @Query('userId') userId?: number,
   ): Promise<HolidayWithFollowData> {
+    const errors = await this.holidayService.validateHoliday(holiday);
+    if (errors && errors.length) throw errors;
     return await this.holidayService.updateHoliday(id, holiday, userId);
   }
 

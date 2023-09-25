@@ -80,6 +80,7 @@ const requestHttp = async (endpoint: string, method: Methods, data?: unknown, pa
       data: method !== 'GET' ? data : null,
       params: method === 'GET' ? params : null,
     });
+    console.log('🚀 ~ file: index.ts:83 ~ requestHttp ~ res:', res);
     return res.data;
   } catch (err) {
     console.log(

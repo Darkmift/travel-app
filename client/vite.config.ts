@@ -17,11 +17,11 @@ export default defineConfig({
     },
   },
   define: {
-    'process.env.API_URL': JSON.stringify('https://api.example.com'),
+    // 'process.env.API_URL': JSON.stringify('https://api.example.com'),
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:3001',
+      '/api': 'http://localhost:5000',
     },
   },
   build: {

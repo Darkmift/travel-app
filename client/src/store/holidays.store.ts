@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { Holiday } from '../types/holiday';
 import { httpService } from '../http';
+import { persist } from 'zustand/middleware';
 
 export interface HolidayState {
   holidays: Holiday[];
@@ -14,51 +15,63 @@ export interface HolidayState {
   remove: (id: number) => Promise<void>;
 }
 
-export const useHolidayStore = create<HolidayState>((set) => ({
-  holidays: [],
-  setHolidays: (holidays) => set({ holidays }),
-  getAll: async (userId) => {
-    try {
-      const holidays = await httpService.get('/holidays', undefined, { userId });
-      set({ holidays });
-    } catch (error) {
-      console.error('Failed to fetch all holidays:', error);
+export const useHolidayStore = create(
+  persist<HolidayState>(
+    (set) => ({
+      holidays: [],
+      setHolidays: (holidays) => set({ holidays }),
+      getAll: async (userId) => {
+        try {
+          const holidays = await httpService.get('/holidays', undefined, { userId });
+          set({ holidays });
+        } catch (error) {
+          console.error('Failed to fetch all holidays:', error);
+        }
+      },
+      getById: async (id, userId) => {
+        try {
+          const holiday = await httpService.get(`/holidays/${id}`, undefined, { userId });
+          set((state) => ({ holidays: [...state.holidays, holiday] }));
+        } catch (error) {
+          console.error(`Failed to fetch holiday with id ${id}:`, error);
+        }
+      },
+      add: async (holiday, userId) => {
+        try {
+          const newHoliday = await httpService.post('/holidays', { ...holiday }, { userId });
+          set((state) => ({ holidays: [...state.holidays, newHoliday] }));
+        } catch (error) {
+          console.error('Failed to add new holiday:', error);
+        }
+      },
+      update: async (id, holiday, userId) => {
+        try {
+          const updatedHoliday = await httpService.put(
+            `/holidays/${id}`,
+            { ...holiday },
+            { userId }
+          );
+          set((state) => ({
+            holidays: state.holidays.map((h) => (h.id === id ? updatedHoliday : h)),
+          }));
+        } catch (error) {
+          console.error(`Failed to update holiday with id ${id}:`, error);
+        }
+      },
+      remove: async (id) => {
+        try {
+          await httpService.delete(`/holidays/${id}`);
+          set((state) => ({
+            holidays: state.holidays.filter((h) => h.id !== id),
+          }));
+        } catch (error) {
+          console.error(`Failed to remove holiday with id ${id}:`, error);
+        }
+      },
+    }),
+    {
+      name: 'holiday-storage', // name of the item in the storage (must be unique)
+      skipHydration: false, // manually rehydrate state from storage (see useEffect in MainAppRouter)
     }
-  },
-  getById: async (id, userId) => {
-    try {
-      const holiday = await httpService.get(`/holidays/${id}`, undefined, { userId });
-      set((state) => ({ holidays: [...state.holidays, holiday] }));
-    } catch (error) {
-      console.error(`Failed to fetch holiday with id ${id}:`, error);
-    }
-  },
-  add: async (holiday, userId) => {
-    try {
-      const newHoliday = await httpService.post('/holidays', { ...holiday }, { userId });
-      set((state) => ({ holidays: [...state.holidays, newHoliday] }));
-    } catch (error) {
-      console.error('Failed to add new holiday:', error);
-    }
-  },
-  update: async (id, holiday, userId) => {
-    try {
-      const updatedHoliday = await httpService.put(`/holidays/${id}`, { ...holiday }, { userId });
-      set((state) => ({
-        holidays: state.holidays.map((h) => (h.id === id ? updatedHoliday : h)),
-      }));
-    } catch (error) {
-      console.error(`Failed to update holiday with id ${id}:`, error);
-    }
-  },
-  remove: async (id) => {
-    try {
-      await httpService.delete(`/holidays/${id}`);
-      set((state) => ({
-        holidays: state.holidays.filter((h) => h.id !== id),
-      }));
-    } catch (error) {
-      console.error(`Failed to remove holiday with id ${id}:`, error);
-    }
-  },
-}));
+  )
+);

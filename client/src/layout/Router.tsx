@@ -3,6 +3,9 @@ import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Layout from './Layout';
+import { useAuthStore } from '../store/auth.store';
+import { useEffect } from 'react';
+import { useHolidayStore } from '../store/holidays.store';
 
 const rootRoute = new RootRoute({
   component: Layout,
@@ -31,6 +34,11 @@ const routeTree = rootRoute.addChildren([homeRoute, loginRoute, registerRoute]);
 const router = new Router({ routeTree });
 
 const MainAppRouter = () => {
+  useEffect(() => {
+    useAuthStore.persist.rehydrate();
+    useHolidayStore.persist.rehydrate();
+  }, []);
+
   return <RouterProvider router={router} />;
 };
 

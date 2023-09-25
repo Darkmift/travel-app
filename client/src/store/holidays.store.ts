@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { Holiday } from '../types/holiday';
 import { httpService } from '../http';
 
-type HolidayState = {
+export interface HolidayState {
   holidays: Holiday[];
   setHolidays: (holidays: Holiday[]) => void;
   getAll: (userId?: number) => Promise<void>;
@@ -12,7 +12,7 @@ type HolidayState = {
   add: (holiday: Holiday, userId?: number) => Promise<void>;
   update: (id: number, holiday: Holiday, userId?: number) => Promise<void>;
   remove: (id: number) => Promise<void>;
-};
+}
 
 export const useHolidayStore = create<HolidayState>((set) => ({
   holidays: [],

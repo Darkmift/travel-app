@@ -6,13 +6,13 @@ import { httpService } from '../http';
 import LocalStorageService from '../services/localstorage-handler.service';
 import { TOKEN_LS_KEY } from '../constants';
 
-type AuthState = {
+export interface AuthState {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   logout: () => void;
   isRoleAdmin: () => boolean;
-};
+}
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -48,3 +48,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return user?.role === 'admin';
   },
 }));
+
+

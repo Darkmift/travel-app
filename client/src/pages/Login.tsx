@@ -1,8 +1,14 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import styled from 'styled-components';
-import { useAuthStore } from '../store/auth.store'; // Import the useAuthStore
+import { useAuthStore } from '../store/auth.store';
+
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { useNavigate } from '@tanstack/react-router';
+import { useSnackbarStore } from '../store/snackbar.store';
 
 type LoginFormInputs = {
   email: string;
@@ -16,55 +22,66 @@ const schema = yup
   })
   .required();
 
-type Props = { className?: string };
+const Login = () => {
+  const handleOpen = useSnackbarStore((state) => state.handleOpen);
 
-const Login = (props: Props) => {
+  const login = useAuthStore((state) => state.login);
+  const user = useAuthStore((state) => state.user);
+
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormInputs>({ resolver: yupResolver(schema) });
 
-  const login = useAuthStore((state) => state.login); // Get the login method from the auth store
-  const user = useAuthStore((state) => state.user); // Get the login method from the auth store
-
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      await login(data.email, data.password); // Use the login method from the auth store
-      console.log('Logged in successfully');
+      await login(data.email, data.password);
+      handleOpen({ message: 'Logged in successfully', severity: 'success' });
+      await setTimeout(() => {}, 1000);
+      navigate({ to: '/' });
     } catch (error) {
       console.error('Error logging in:', error);
+      handleOpen({ message: `Login failed: ${(error as Error).message}`, severity: 'error' });
     }
   };
 
   return (
-    <form className={props.className} onSubmit={handleSubmit(onSubmit)}>
-      <h3>Login</h3>
-      <div className="input-wrapper">
-        <label htmlFor="email">Email</label>
-        <input type="email" {...register('email')} />
-        {errors.email && <span>{errors.email.message}</span>}
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, p: 2 }}>
+      <Typography variant="h5" gutterBottom component="div">
+        Login
+      </Typography>
+      <TextField
+        margin="normal"
+        fullWidth
+        id="email"
+        label="Email"
+        autoComplete="email"
+        autoFocus
+        {...register('email')}
+        error={!!errors.email}
+        helperText={errors.email?.message}
+      />
+      <TextField
+        margin="normal"
+        fullWidth
+        label="Password"
+        type="password"
+        id="password"
+        autoComplete="current-password"
+        {...register('password')}
+        error={!!errors.password}
+        helperText={errors.password?.message}
+      />
+      <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+        Login
+      </Button>
 
-        <label htmlFor="password">Password</label>
-        <input type="password" {...register('password')} />
-        {errors.password && <span>{errors.password.message}</span>}
-      </div>
-      <input type="submit" value="Login" />
       {JSON.stringify(user, null, 2)}
-    </form>
+    </Box>
   );
 };
 
-const StyledLogin = styled(Login)`
-  display: flex;
-  flex-direction: column;
-  max-width: 500px;
-  .input-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  gap: 5px;
-`;
-
-export default StyledLogin;
+export default Login;

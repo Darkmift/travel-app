@@ -1,5 +1,15 @@
+import { Box, Container, Typography } from '@mui/material';
+
 const Home = () => {
-  return <div>Home</div>;
+  return (
+    <Container>
+      <Box>
+        <Typography variant="h1" component={'h1'}>
+          Home
+        </Typography>
+      </Box>
+    </Container>
+  );
 };
 
 export default Home;

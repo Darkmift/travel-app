@@ -6,6 +6,8 @@ import MainAppRouter from './layout/Router';
 import { mountStoreDevtool } from 'simple-zustand-devtools';
 import { useAuthStore } from './store/auth.store';
 import { useHolidayStore } from './store/holidays.store';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import theme from './layout/theme';
 
 if (process.env.NODE_ENV === 'development') {
   mountStoreDevtool('Auth', useAuthStore);
@@ -14,6 +16,9 @@ if (process.env.NODE_ENV === 'development') {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MainAppRouter />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <MainAppRouter />
+    </ThemeProvider>
   </React.StrictMode>
 );

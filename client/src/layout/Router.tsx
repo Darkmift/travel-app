@@ -1,10 +1,17 @@
-import { RouterProvider, Router, Route, RootRoute, redirect } from '@tanstack/react-router';
+import {
+  RouterProvider,
+  Router,
+  Route,
+  RootRoute,
+  redirect,
+  useNavigate,
+} from '@tanstack/react-router';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Layout from './Layout';
 import { useAuthStore } from '../store/auth.store';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useHolidayStore } from '../store/holidays.store';
 
 const rootRoute = new RootRoute({
@@ -42,7 +49,23 @@ const registerRoute = new Route({
   component: Register,
 });
 
-const routeTree = rootRoute.addChildren([homeRoute, loginRoute, registerRoute]);
+const Logout = () => {
+  const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
+  useEffect(() => {
+    logout();
+    navigate({ to: '/login' });
+  }, []);
+  return <></>;
+};
+
+const signOutRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '/logout',
+  component: Logout,
+});
+
+const routeTree = rootRoute.addChildren([homeRoute, loginRoute, registerRoute, signOutRoute]);
 
 const router = new Router({ routeTree });
 

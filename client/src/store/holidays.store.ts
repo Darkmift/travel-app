@@ -15,6 +15,8 @@ export interface HolidayState {
   remove: (id: number) => Promise<void>;
 }
 
+const API_ENDPOINT = '/holiday';
+
 export const useHolidayStore = create(
   persist<HolidayState>(
     (set) => ({
@@ -22,7 +24,7 @@ export const useHolidayStore = create(
       setHolidays: (holidays) => set({ holidays }),
       getAll: async (userId) => {
         try {
-          const holidays = await httpService.get('/holidays', undefined, { userId });
+          const holidays = await httpService.get(API_ENDPOINT, undefined, { userId });
           set({ holidays });
         } catch (error) {
           console.error('Failed to fetch all holidays:', error);
@@ -30,7 +32,7 @@ export const useHolidayStore = create(
       },
       getById: async (id, userId) => {
         try {
-          const holiday = await httpService.get(`/holidays/${id}`, undefined, { userId });
+          const holiday = await httpService.get(`${API_ENDPOINT}/${id}`, undefined, { userId });
           set((state) => ({ holidays: [...state.holidays, holiday] }));
         } catch (error) {
           console.error(`Failed to fetch holiday with id ${id}:`, error);
@@ -38,7 +40,7 @@ export const useHolidayStore = create(
       },
       add: async (holiday, userId) => {
         try {
-          const newHoliday = await httpService.post('/holidays', { ...holiday }, { userId });
+          const newHoliday = await httpService.post(API_ENDPOINT, { ...holiday }, { userId });
           set((state) => ({ holidays: [...state.holidays, newHoliday] }));
         } catch (error) {
           console.error('Failed to add new holiday:', error);
@@ -47,7 +49,7 @@ export const useHolidayStore = create(
       update: async (id, holiday, userId) => {
         try {
           const updatedHoliday = await httpService.put(
-            `/holidays/${id}`,
+            `${API_ENDPOINT}/${id}`,
             { ...holiday },
             { userId }
           );
@@ -60,7 +62,7 @@ export const useHolidayStore = create(
       },
       remove: async (id) => {
         try {
-          await httpService.delete(`/holidays/${id}`);
+          await httpService.delete(`${API_ENDPOINT}/${id}`);
           set((state) => ({
             holidays: state.holidays.filter((h) => h.id !== id),
           }));

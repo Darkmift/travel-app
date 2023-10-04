@@ -33,6 +33,7 @@ import { HttpExceptionFilter } from 'src/common/filters/http-exception';
 // multer
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/multer.config';
+import { HOLIDAY_FILTER } from './holiday.types';
 
 @ApiTags('Holidays')
 @ApiBearerAuth()
@@ -43,7 +44,7 @@ export class HolidayController {
     private readonly holidayService: HolidayService,
     private readonly logger: Logger,
   ) {}
-
+  /*
   @ApiOperation({ summary: 'Get all holidays' })
   @ApiResponse({
     status: 200,
@@ -55,6 +56,28 @@ export class HolidayController {
   ): Promise<HolidayWithFollowData[]> {
     this.logger.log('Getting all holidays');
     return await this.holidayService.getAllHolidays(userId);
+  }
+*/
+
+  @ApiOperation({ summary: 'Get paginated holidays' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns paginated holidays based on filter.',
+  })
+  @Get()
+  async getPaginatedHolidays(
+    @Query('page') page: string,
+    @Query('pageSize') pageSize: string,
+    @Query('filter') filter: HOLIDAY_FILTER,
+    @Query('userId') userId?: number,
+  ): Promise<HolidayWithFollowData[]> {
+    this.logger.log('Getting paginated holidays');
+    return await this.holidayService.getPaginatedHolidays(
+      parseInt(page),
+      parseInt(pageSize),
+      filter,
+      userId,
+    );
   }
 
   @ApiOperation({ summary: 'Get holiday by ID' })

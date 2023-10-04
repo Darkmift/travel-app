@@ -55,6 +55,7 @@ export class HolidayService {
   }
 
   async validateHoliday(holiday: Holiday): Promise<void | ValidationError[]> {
+    holiday.price = parseFloat(holiday.price.toString());
     const preValidatedHoliday = new Holiday();
     Object.assign(preValidatedHoliday, holiday);
     const errors = await validate(preValidatedHoliday);

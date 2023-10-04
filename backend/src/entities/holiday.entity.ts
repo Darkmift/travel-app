@@ -10,6 +10,9 @@ import {
   IsOptional,
 } from '@nestjs/class-validator';
 import { IsDateString } from '@nestjs/class-validator';
+import { IsFile } from '../common/decorators/is-file';
+
+export const IMAGE_KEY = 'image-file';
 
 @Entity('holidays')
 export class Holiday {
@@ -58,6 +61,12 @@ export class Holiday {
 
   @ManyToMany(() => User, (user) => user.holidays)
   followers: User[];
+}
+
+export class HolidayDTO extends Holiday {
+  @IsFile()
+  @ApiPropertyOptional()
+  imageFile: Express.Multer.File;
 }
 
 export class HolidayWithFollowData extends Holiday {

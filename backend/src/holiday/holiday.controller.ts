@@ -10,6 +10,8 @@ import {
   Query,
   Logger,
   UseFilters,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,9 +21,18 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { HolidayService } from './holiday.service';
-import { Holiday, HolidayWithFollowData } from 'src/entities/holiday.entity';
+import {
+  Holiday,
+  HolidayDTO,
+  HolidayWithFollowData,
+  IMAGE_KEY,
+} from 'src/entities/holiday.entity';
 import { AuthGuard } from '../auth/auth.guard';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception';
+
+// multer
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from 'src/multer.config';
 
 @ApiTags('Holidays')
 @ApiBearerAuth()
@@ -69,10 +80,14 @@ export class HolidayController {
   @ApiBody({ type: Holiday })
   @UseGuards(AuthGuard)
   @Post()
+  @UseInterceptors(FileInterceptor(IMAGE_KEY, multerConfig))
+  @UseFilters()
   async createHoliday(
-    @Body() holiday: Holiday,
+    @Body() holiday: HolidayDTO,
     @Query('userId') userId?: number,
-  ): Promise<HolidayWithFollowData> {
+    @UploadedFile() imageFile?: Express.Multer.File,
+  ): Promise<HolidayWithFollowData | void> {
+    holiday.image_name = `${imageFile.destination}/${imageFile.filename}`;
     const errors = await this.holidayService.validateHoliday(holiday);
     if (errors && errors.length) throw errors;
     return await this.holidayService.createHoliday(holiday, userId);

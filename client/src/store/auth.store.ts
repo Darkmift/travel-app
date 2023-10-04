@@ -15,18 +15,20 @@ export interface AuthState {
   isRoleAdmin: () => boolean;
 }
 
+const API_ENDPOINT = '/auth';
+
 export const useAuthStore = create(
   persist<AuthState>(
     (set, get) => ({
       user: null,
       login: async (email, password) => {
-        const user: User = await httpService.post('/auth/login', { email, password });
+        const user: User = await httpService.post(`${API_ENDPOINT}/login`, { email, password });
         if (!user.first_name) throw new Error('Invalid user');
         set({ user });
       },
       register: async (email, password, firstName, lastName) => {
         try {
-          const user = await httpService.post('/auth/register', {
+          const user = await httpService.post(`${API_ENDPOINT}/register`, {
             email,
             password,
             first_name: firstName,

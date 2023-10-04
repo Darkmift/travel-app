@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import logger from './utils/winston.util';
+import * as serveStatic from 'serve-static';
+import * as path from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger });
@@ -23,6 +25,9 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
+
+  app.use('/uploads', serveStatic(path.join(__dirname, '..', 'uploads')));
+
   SwaggerModule.setup('swagger', app, document);
 
   await app.listen(port);

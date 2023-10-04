@@ -1,17 +1,16 @@
-import { Box, Card, CardContent, CardMedia, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Chip, Typography } from '@mui/material';
 import { Holiday } from '../types';
 import imageDefault from '../assets/images/image-default.jpg';
 import { HOST_URL } from '../constants';
 import { formatDate } from '../utils/formatDate';
+import { useHolidayStore } from '../store/holidays.store';
+import { useState } from 'react';
 
 type Props = { holiday: Holiday };
 
 function HolidayCard({ holiday }: Props) {
-  console.log(
-    '🚀 ~ file: HolidayCard.tsx:15 ~ HolidayCard ~ BASE_URL:',
-    HOST_URL,
-    holiday.image_name
-  );
+  const toggleFollow = useHolidayStore((state) => state.toggleFollow);
+  const [disableFollowClick, setDisableFollowClick] = useState(false);
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ position: 'relative' }}>
@@ -49,6 +48,17 @@ function HolidayCard({ holiday }: Props) {
         <Typography variant="body2" color="text.secondary" sx={{ marginTop: 'auto' }}>
           {formatDate(holiday.start_date)}&nbsp;&gt;&nbsp;{formatDate(holiday.end_date)}
         </Typography>
+        <Chip
+          label={`Followers: ${holiday.followerCount}`}
+          color={holiday.isFollowing ? 'primary' : 'default'}
+          disabled={disableFollowClick}
+          onClick={() => {
+            setDisableFollowClick(true);
+            toggleFollow(holiday.id).then(() => setDisableFollowClick(false));
+          }}
+          size="small"
+          sx={{ maxWidth: '33%' }}
+        />
       </CardContent>
     </Card>
   );

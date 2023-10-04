@@ -111,6 +111,20 @@ export class HolidayController {
     return await this.holidayService.updateHoliday(id, holiday, userId);
   }
 
+  @ApiOperation({ summary: 'Toggle follow a holiday' })
+  @ApiResponse({
+    status: 200,
+    description: 'The holiday has been successfully updated.',
+  })
+  @UseGuards(AuthGuard)
+  @Put(':id/toggle-follow')
+  async toggleFollowHoliday(
+    @Param('id') id: number,
+    @Query('userId') userId?: number,
+  ): Promise<boolean> {
+    return await this.holidayService.toggleFollowHoliday(id, userId);
+  }
+
   @ApiOperation({ summary: 'Delete a holiday' })
   @ApiResponse({
     status: 200,

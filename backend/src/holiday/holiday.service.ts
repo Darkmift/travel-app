@@ -85,6 +85,51 @@ export class HolidayService {
     return this.getHolidayById(id, userId);
   }
 
+  async toggleFollowHoliday(id: number, userId: number): Promise<boolean> {
+    // check if user is following holiday
+    const holiday = await this.getHolidayById(id, userId);
+    const isFollowing = holiday.isFollowing;
+
+    const connection = this.holidayRepository.manager.connection;
+    const queryRunner = connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      if (isFollowing) {
+        // remove user from followers
+        await queryRunner.manager
+          .createQueryBuilder()
+          .delete()
+          .from('user_holidays_holidays')
+          .where('holidaysId = :holidayId AND userId = :userId', {
+            holidayId: id,
+            userId,
+          })
+          .execute();
+      } else {
+        // add user to followers
+        await queryRunner.manager
+          .createQueryBuilder()
+          .insert()
+          .into('user_holidays_holidays')
+          .values({ holidaysId: id, userId })
+          .execute();
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      // log error here
+      this.logger.error('Error toggling follow status:', err);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+
+    return !isFollowing;
+  }
+
   async deleteHoliday(id: number): Promise<void> {
     await this.holidayRepository.delete(id);
   }

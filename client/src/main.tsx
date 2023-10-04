@@ -10,7 +10,8 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from './layout/theme';
 import { useSnackbarStore } from './store/snackbar.store';
 
-if (process.env.NODE_ENV === 'development') {
+const { VITE_NODE_ENV } = import.meta.env;
+if (VITE_NODE_ENV === 'development') {
   mountStoreDevtool('SanckBar', useSnackbarStore);
   mountStoreDevtool('Auth', useAuthStore);
   mountStoreDevtool('Holidays', useHolidayStore);

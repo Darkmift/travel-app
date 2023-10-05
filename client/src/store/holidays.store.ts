@@ -1,15 +1,22 @@
 // src/stores/holidayStore.ts
 
 import { create } from 'zustand';
-import { Holiday } from '../types/holiday';
+import { HOLIDAY_FILTER, Holiday } from '../types/holiday';
 import { httpService } from '../http';
 import { persist } from 'zustand/middleware';
 import { useAuthStore } from './auth.store';
 
 export interface HolidayState {
   holidays: Holiday[];
+  total: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  filter: HOLIDAY_FILTER;
+  pageSize: number;
+  page: number;
   setHolidays: (holidays: Holiday[]) => void;
-  getAll: (userId?: number) => Promise<void>;
+  setPagination: (paginationParams: Partial<PaginatedState>) => void;
+  getAll: () => Promise<void>;
   getById: (id: number, userId?: number) => Promise<void>;
   add: (holiday: Holiday, userId?: number) => Promise<void>;
   update: (id: number, holiday: Holiday, userId?: number) => Promise<void>;
@@ -21,16 +28,40 @@ const API_ENDPOINT = '/holiday';
 
 const getUserId = () => useAuthStore.getState().user?.id;
 
+export type PaginatedState = {
+  total: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  filter: HOLIDAY_FILTER;
+  pageSize: number;
+  page: number;
+};
+
 export const useHolidayStore = create(
   persist<HolidayState>(
-    (set) => ({
+    (set, get) => ({
       holidays: [],
+      total: 0,
+      hasNextPage: false,
+      hasPrevPage: true,
+      filter: HOLIDAY_FILTER.NONE,
+      pageSize: 6,
+      page: 1,
       setHolidays: (holidays) => set({ holidays }),
+      setPagination: (paginationParams: Partial<PaginatedState>) => {
+        set((state) => ({ ...state, ...paginationParams }));
+        get().getAll();
+      },
       getAll: async () => {
         try {
           const userId = getUserId();
-          const holidays = await httpService.get(API_ENDPOINT, undefined, { userId });
-          set({ holidays });
+          const query = `${API_ENDPOINT}`;
+          const { holidays, total, hasNextPage, hasPrevPage } = await httpService.get(
+            query,
+            undefined,
+            { userId, page: get().page, pageSize: get().pageSize, filter: get().filter }
+          );
+          set({ holidays, total, hasNextPage, hasPrevPage });
         } catch (error) {
           console.error('Failed to fetch all holidays:', error);
         }

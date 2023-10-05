@@ -3,6 +3,7 @@ import { Injectable, Logger, ValidationError } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Holiday, HolidayWithFollowData } from 'src/entities/holiday.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { HOLIDAY_FILTER, HolidayPaginatedResponse } from './holiday.types';
 
 @Injectable()
 export class HolidayService {
@@ -27,6 +28,82 @@ export class HolidayService {
       )
       .setParameter('userId', userId)
       .groupBy('holiday.id');
+  }
+
+  async getPaginatedHolidays1(
+    page: number = 1,
+    pageSize: number = 10,
+    filter: HOLIDAY_FILTER,
+    userId?: number,
+  ): Promise<HolidayWithFollowData[]> {
+    // Validate parameters
+    if (!Number.isInteger(page) || page <= 0)
+      throw new Error('Invalid page number');
+    if (!Number.isInteger(pageSize) || pageSize <= 0)
+      throw new Error('Invalid page size');
+    if (!Object.values(HOLIDAY_FILTER).includes(filter))
+      throw new Error('Invalid filter value');
+
+    // Execute the stored procedure
+    const rawHolidays = await this.holidayRepository.query(
+      'CALL GetPaginatedHolidays(?, ?, ?, ?)',
+      [page, pageSize, filter, userId],
+    );
+
+    // Map the raw results to your HolidayWithFollowData type
+    const holidays: HolidayWithFollowData[] = rawHolidays[0].map(
+      (rawHoliday: any) => {
+        return {
+          ...rawHoliday,
+          followerCount: parseInt(rawHoliday.followerCount),
+          isFollowing: !!parseInt(rawHoliday.isFollowing),
+        };
+      },
+    );
+
+    return holidays;
+  }
+
+  async getPaginatedHolidays(
+    page: number = 1,
+    pageSize: number = 10,
+    filter: HOLIDAY_FILTER,
+    userId?: number,
+  ): Promise<HolidayPaginatedResponse> {
+    // Validate parameters
+    if (!Number.isInteger(page) || page <= 0)
+      throw new Error('Invalid page number');
+    if (!Number.isInteger(pageSize) || pageSize <= 0)
+      throw new Error('Invalid page size');
+    if (!Object.values(HOLIDAY_FILTER).includes(filter))
+      throw new Error('Invalid filter value');
+
+    // Execute the stored procedure
+    const rawHolidays = await this.holidayRepository.query(
+      'CALL GetPaginatedHolidays(?, ?, ?, ?)',
+      [page, pageSize, filter, userId],
+    );
+
+    // Get total count from the stored procedure result
+    const total = rawHolidays[0].length > 0 ? rawHolidays[0][0].totalCount : 0;
+    // Calculate hasNextPage and hasPrevPage
+    const hasNextPage = total > page * pageSize;
+    const hasPrevPage = page > 1;
+
+    // Map the raw results to your HolidayWithFollowData type
+    const holidays: HolidayWithFollowData[] = rawHolidays[0].map(
+      (rawHoliday: any) => {
+        delete rawHoliday.totalCount;
+        return {
+          ...rawHoliday,
+          followerCount: parseInt(rawHoliday.followerCount),
+          isFollowing: !!parseInt(rawHoliday.isFollowing),
+        };
+      },
+    );
+
+    // Return the result
+    return { holidays, total, hasNextPage, hasPrevPage };
   }
 
   private castHolidayWithFollowData(

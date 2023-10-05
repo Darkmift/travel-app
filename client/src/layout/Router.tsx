@@ -11,7 +11,7 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Layout from './Layout';
 import { useAuthStore } from '../store/auth.store';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useHolidayStore } from '../store/holidays.store';
 
 const rootRoute = new RootRoute({

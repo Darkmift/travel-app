@@ -1,4 +1,5 @@
-FROM node:18-alpine As Build
+# Build stage
+FROM node:20-alpine AS Build
 
 WORKDIR /usr/src/app
 
@@ -20,7 +21,8 @@ COPY --chown=node:node ./src ./src
 
 RUN yarn run build
 
-FROM node:18-alpine as production
+# Production stage
+FROM node:20-alpine as production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -28,10 +30,16 @@ RUN apk add dumb-init
 
 WORKDIR /usr/src/app
 
+# Copy from build stage
 COPY --chown=node:node --from=Build /usr/src/app/node_modules ./node_modules
 COPY --chown=node:node --from=Build /usr/src/app/dist/ /usr/src/app/.env ./
 
+# Here's the crucial part: you change the ownership of the WORKDIR to the 'node' user.
+# This command gives the 'node' user the ability to create, modify, and delete files and directories within /usr/src/app
+RUN chown -R node:node /usr/src/app
+
+# Switching to user 'node' for better security during runtime
 USER node
 
-CMD ["dumb-init", "node", "--max-old-space-size=1024", "main" ]
+CMD ["dumb-init", "node", "--max-old-space-size=1024", "main"]
 EXPOSE 80

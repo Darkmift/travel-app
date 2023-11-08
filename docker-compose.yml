@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        - NODE_ENV=production
+        # Specify other args like NPM_TOKEN if required
+    environment:
+      - DATABASE_HOST=mysql # Or the appropriate host for your database
+      - FRONTEND_URL=http://localhost:3000
+      # other environment variables needed by your app
+    ports:
+      - '5000:5000' # It seems your app inside the container is running on port 80
+    depends_on:
+      - mysql # Only if your backend requires a MySQL database
+
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_NODE_ENV: 'production' # or another appropriate value
+        VITE_API_URL: 'http://localhost:5000/api'
+        VITE_HOST_URL: 'http://localhost:5000/uploads'
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production # If you're running in a production environment
+
+  mysql:
+    image: mysql:latest # Recommended to use a specific version
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'dev'
+      # MYSQL_USER: 'root' (uncomment and set this if you're creating a user other than root)
+      # MYSQL_PASSWORD: 'A12345' (uncomment and set this if you're creating a user other than root)
+      MYSQL_ROOT_PASSWORD: 'A12345'
+    ports:
+      - '3306:3306' # <--- This line exposes MySQL to the outside world
+    volumes:
+      - my-db:/var/lib/mysql
+
+volumes:
+  my-db:

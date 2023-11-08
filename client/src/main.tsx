@@ -9,9 +9,9 @@ import { useHolidayStore } from './store/holidays.store';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import theme from './layout/theme';
 import { useSnackbarStore } from './store/snackbar.store';
+import { ENV } from './constants';
 
-const { VITE_NODE_ENV } = import.meta.env;
-if (VITE_NODE_ENV === 'development') {
+if (ENV === 'development') {
   mountStoreDevtool('SanckBar', useSnackbarStore);
   mountStoreDevtool('Auth', useAuthStore);
   mountStoreDevtool('Holidays', useHolidayStore);

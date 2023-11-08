@@ -72,7 +72,7 @@ export const httpService = {
 };
 
 const requestHttp = async (endpoint: string, method: Methods, data?: unknown, params?: unknown) => {
-  console.info('initiating httpRequest with:', { endpoint, data, method, params });
+  console.info('initiating httpRequest with:', { BASE_URL, endpoint, data, method, params });
   try {
     const res = await axiosInstance({
       url: `${BASE_URL}${endpoint}`,

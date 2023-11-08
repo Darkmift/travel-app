@@ -34,7 +34,7 @@ import { HttpExceptionFilter } from 'src/common/filters/http-exception';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from 'src/multer.config';
 import { HOLIDAY_FILTER, HolidayPaginatedResponse } from './holiday.types';
-
+import { Express } from 'express';
 @ApiTags('Holidays')
 @ApiBearerAuth()
 @Controller('api/holiday')

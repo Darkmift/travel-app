@@ -11,6 +11,7 @@ import {
 } from '@nestjs/class-validator';
 import { IsDateString } from '@nestjs/class-validator';
 import { IsFile } from '../common/decorators/is-file';
+import { Express } from 'express';
 
 export const IMAGE_KEY = 'image-file';
 
